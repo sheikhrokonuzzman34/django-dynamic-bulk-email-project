@@ -4,7 +4,6 @@ from django.contrib import messages
 from django.core.mail import send_mail
 from django.conf import settings
 from django.template import Template, Context
-from django.urls import reverse
 
 from main.forms import *
 from main.models import *
@@ -60,6 +59,7 @@ def send_bulk_email(request):
         if form.is_valid():
             template = form.cleaned_data['template']
             excel_file = request.FILES['excel_file']
+            file_name = excel_file.name  # Get the name of the uploaded file
             
             try:
                 # Read Excel file
@@ -77,8 +77,11 @@ def send_bulk_email(request):
                 # Process each row
                 for _, row in df.iterrows():
                     try:
-                        # Prepare email content
-                        context = Context({'name': row['name']})
+                        # Prepare email content with file name in the context
+                        context = Context({
+                            'name': row['name'],
+                            'file_name': file_name  # Include the file name in the context
+                        })
                         subject_template = Template(template.subject)
                         body_template = Template(template.body)
                         
