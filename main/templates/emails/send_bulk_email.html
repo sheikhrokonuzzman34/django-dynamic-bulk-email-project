@@ -1,0 +1,43 @@
+<!-- templates/emails/send_bulk_email.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Send Bulk Email</h2>
+    
+    <div class="alert alert-info">
+        <h5>Instructions:</h5>
+        <ol>
+            <li>Prepare an Excel file with columns: name, email</li>
+            <li>Select an email template</li>
+            <li>Upload your Excel file</li>
+        </ol>
+    </div>
+    
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        {% if form.errors %}
+        <div class="alert alert-danger">
+            Please correct the errors below.
+        </div>
+        {% endif %}
+        
+        <div class="form-group mb-3">
+            <label for="{{ form.template.id_for_label }}">Select Template:</label>
+            {{ form.template }}
+            {{ form.template.errors }}
+        </div>
+        
+        <div class="form-group mb-3">
+            <label for="{{ form.excel_file.id_for_label }}">Upload Excel File:</label>
+            {{ form.excel_file }}
+            <small class="form-text text-muted">{{ form.excel_file.help_text }}</small>
+            {{ form.excel_file.errors }}
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Send Emails</button>
+        <a href="{% url 'template_list' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}
