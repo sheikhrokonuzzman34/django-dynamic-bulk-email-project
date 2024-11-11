@@ -1,0 +1,38 @@
+<!-- templates/emails/template_list.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Email Templates</h2>
+    <div class="mb-3">
+        <a href="{% url 'template_create' %}" class="btn btn-primary">Create New Template</a>
+        <a href="{% url 'send_bulk_email' %}" class="btn btn-success">Send Bulk Email</a>
+    </div>
+    
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Subject</th>
+                <th>Created At</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for template in templates %}
+            <tr>
+                <td>{{ template.name }}</td>
+                <td>{{ template.subject }}</td>
+                <td>{{ template.created_at|date:"Y-m-d H:i" }}</td>
+                <td>
+                    <a href="{% url 'template_edit' template.id %}" 
+                       class="btn btn-warning btn-sm">Edit</a>
+                    <a href="{% url 'template_delete' template.id %}" 
+                       class="btn btn-danger btn-sm">Delete</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
