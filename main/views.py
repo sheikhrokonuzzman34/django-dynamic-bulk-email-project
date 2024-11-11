@@ -133,3 +133,18 @@ def send_bulk_email(request):
 def email_logs(request):
     logs = EmailLog.objects.all().order_by('-sent_at')
     return render(request, 'emails/email_logs.html', {'logs': logs})
+
+
+
+def delete_selected_email_logs(request):
+    if request.method == 'POST':
+        log_ids = request.POST.getlist('log_ids')
+        
+        if log_ids:
+            # Delete selected logs
+            EmailLog.objects.filter(id__in=log_ids).delete()
+            messages.success(request, f'Successfully deleted {len(log_ids)} log(s).')
+        else:
+            messages.warning(request, 'No logs selected for deletion.')
+            
+    return redirect('email_logs')

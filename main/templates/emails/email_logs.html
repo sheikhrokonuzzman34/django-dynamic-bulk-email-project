@@ -5,31 +5,47 @@
 <div class="container mt-4">
     <h2>Email Logs</h2>
     
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Recipient</th>
-                <th>Subject</th>
-                <th>Status</th>
-                <th>Error</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for log in logs %}
-            <tr>
-                <td>{{ log.sent_at|date:"Y-m-d H:i" }}</td>
-                <td>{{ log.recipient_name }} ({{ log.recipient_email }})</td>
-                <td>{{ log.subject }}</td>
-                <td>
-                    <span class="badge {% if log.status == 'SUCCESS' %}bg-success{% else %}bg-danger{% endif %}">
-                        {{ log.status }}
-                    </span>
-                </td>
-                <td>{{ log.error_message|truncatechars:50 }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <form method="post" action="{% url 'delete_selected_email_logs' %}">
+        {% csrf_token %}
+        
+        <table class="table">
+            <thead>
+                <tr>
+                    <th><input type="checkbox" id="select_all"> All</th>
+                    <th>Date</th>
+                    <th>Recipient</th>
+                    <th>Subject</th>
+                    <th>Status</th>
+                    <th>Error</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                <tr>
+                    <td><input type="checkbox" name="log_ids" value="{{ log.id }}"></td>
+                    <td>{{ log.sent_at|date:"Y-m-d H:i" }}</td>
+                    <td>{{ log.recipient_name }} ({{ log.recipient_email }})</td>
+                    <td>{{ log.subject }}</td>
+                    <td>
+                        <span class="badge {% if log.status == 'SUCCESS' %}bg-success{% else %}bg-danger{% endif %}">
+                            {{ log.status }}
+                        </span>
+                    </td>
+                    <td>{{ log.error_message|truncatechars:50 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        <button type="submit" class="btn btn-danger">Delete Selected</button>
+    </form>
 </div>
+
+<script>
+    // JavaScript to toggle all checkboxes
+    document.getElementById('select_all').addEventListener('click', function() {
+        const checkboxes = document.querySelectorAll('input[name="log_ids"]');
+        checkboxes.forEach(checkbox => checkbox.checked = this.checked);
+    });
+</script>
 {% endblock %}

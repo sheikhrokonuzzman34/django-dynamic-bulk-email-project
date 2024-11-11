@@ -8,4 +8,6 @@ urlpatterns = [
     path('templates/<int:pk>/delete/', views.template_delete, name='template_delete'),
     path('send/', views.send_bulk_email, name='send_bulk_email'),
     path('logs/', views.email_logs, name='email_logs'),
+    
+    path('email-logs/delete-selected/', views.delete_selected_email_logs, name='delete_selected_email_logs'),
 ]
