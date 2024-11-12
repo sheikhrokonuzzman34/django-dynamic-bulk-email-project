@@ -52,6 +52,17 @@ def template_delete(request, pk):
     return render(request, 'emails/template_confirm_delete.html', {
         'template': template
     })
+    
+    
+from django.shortcuts import render, redirect
+from django.core.mail import EmailMultiAlternatives
+from django.template import Template, Context
+from django.utils.html import strip_tags
+from django.contrib import messages
+from django.conf import settings
+import pandas as pd
+from .forms import BulkEmailForm
+from .models import EmailTemplate, EmailLog
 
 def send_bulk_email(request):
     if request.method == 'POST':
@@ -83,37 +94,42 @@ def send_bulk_email(request):
                             'file_name': file_name  # Include the file name in the context
                         })
                         subject_template = Template(template.subject)
-                        body_template = Template(template.body)
+                        body_template = Template(template.body)  # Assuming template.body contains HTML content
                         
+                        # Render subject and body
                         subject = subject_template.render(context)
-                        body = body_template.render(context)
+                        html_body = body_template.render(context)
+                        plain_body = strip_tags(html_body)  # Convert HTML to plain text for plain text alternative
+                        
+                        # Prepare and send email
+                        email = EmailMultiAlternatives(
+                            subject,
+                            plain_body,  # Set plain text body as fallback
+                            settings.DEFAULT_FROM_EMAIL,
+                            [row['email']]
+                        )
+                        email.attach_alternative(html_body, "text/html")  # Attach HTML content
                         
                         # Send email
-                        send_mail(
-                            subject,
-                            body,
-                            settings.DEFAULT_FROM_EMAIL,
-                            [row['email']],
-                            fail_silently=False,
-                        )
-                        
+                        email.send(fail_silently=False)
+
                         # Log success
                         EmailLog.objects.create(
                             subject=subject,
                             recipient_email=row['email'],
                             recipient_name=row['name'],
-                            body=body,
+                            body=html_body,
                             status='SUCCESS'
                         )
                         success_count += 1
-                        
+
                     except Exception as e:
                         # Log failure
                         EmailLog.objects.create(
                             subject=subject if 'subject' in locals() else template.subject,
                             recipient_email=row['email'],
                             recipient_name=row['name'],
-                            body=body if 'body' in locals() else template.body,
+                            body=html_body if 'html_body' in locals() else template.body,
                             status='FAILED',
                             error_message=str(e)
                         )
